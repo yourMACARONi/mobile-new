@@ -7,6 +7,8 @@ import {
 import { useState, useRef } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
+import { saveSessionFromQr, getUser } from "@/helper/session";
+import Overlay from "@/components/ui/qrOverlay";
 
 export default function LoginScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -26,8 +28,8 @@ export default function LoginScreen() {
     if (data && !qrLock.current) {
       qrLock.current = true;
       try {
-        //await saveSessionFromQr(data);
-        //const user = await getUser();
+        await saveSessionFromQr(data);
+        const user = await getUser();
         setScanned(false);
         setIsLoading(false);
         router.replace("/(tabs)");
@@ -49,7 +51,6 @@ export default function LoginScreen() {
     );
   }
 
-  router.push("/(tabs)/transaction");
   return (
     <View style={styles.container}>
       <CameraView
@@ -64,6 +65,7 @@ export default function LoginScreen() {
       >
         <View style={styles.buttonContainer}></View>
       </CameraView>
+      <Overlay />
     </View>
   );
 }

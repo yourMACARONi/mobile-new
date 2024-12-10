@@ -1,5 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 import { NEXT_API_URL } from "@/constants/api";
+import { useRouter } from "expo-router";
 
 export const saveSessionFromQr = async (data: string) => {
   const saveData = await SecureStore.setItemAsync("session", data);
@@ -8,7 +9,7 @@ export const saveSessionFromQr = async (data: string) => {
 };
 
 export const getSession = async () => {
-    await saveSessionFromQr('eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiIxMDAzIiwiZW1haWwiOiJsZW55YWpwYXRpYXJiYUBnbWFpbC5jb20iLCJleHBpcmVzQXQiOiIyMDI0LTEyLTEwVDA1OjE4OjAwLjI0MloiLCJpYXQiOjE3MzM4MDQyODAsImV4cCI6MTczMzgwNzg4MH0.Ygm953wAmUGo7LaD91v1diNgmLkSTjnLqLFHxVll2vw');
+    //await saveSessionFromQr('eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiIxMDAzIiwiZW1haWwiOiJsZW55YWpwYXRpYXJiYUBnbWFpbC5jb20iLCJleHBpcmVzQXQiOiIyMDI0LTEyLTEwVDA1OjE4OjAwLjI0MloiLCJpYXQiOjE3MzM4MDQyODAsImV4cCI6MTczMzgwNzg4MH0.Ygm953wAmUGo7LaD91v1diNgmLkSTjnLqLFHxVll2vw');
   const data = await SecureStore.getItemAsync("session");
 
   return data;
@@ -46,7 +47,6 @@ export const getUser = async () => {
 
     return await response.json();
   } catch (error) {
-    console.error("Error fetching user:", error);
     throw new Error("An unexpected error occurred.");
   }
 };

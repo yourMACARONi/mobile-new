@@ -15,7 +15,7 @@ import { useCallback, useState, useEffect } from "react";
 import { getUser, removeSession } from "@/helper/session";
 import { useRouter } from "expo-router";
 import { Text } from "react-native-paper";
-import Transactions from "@/components/features/Transactions";
+import Transactions from "@/components/features/ReceiptTable";
 import Chart from "@/components/features/SalesExpensePieChart";
 
 export default function HomeScreen() {
@@ -33,6 +33,7 @@ export default function HomeScreen() {
       } catch (error) {
         await removeSession();
         router.replace("/");
+        console.log(error);
       }
     };
     request();
@@ -67,7 +68,6 @@ export default function HomeScreen() {
           <View style={{ margin: 20 }}>
             <SummaryCards />
           </View>
-          //Chart
           <View>
             <Chart />
           </View>
