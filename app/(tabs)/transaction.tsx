@@ -5,6 +5,7 @@ import SaleTable from "@/components/features/SaleTable";
 import { useCallback, useState } from "react";
 import LoadingIndicator from "@/components/ui/LoadingIndicator";
 import { Text } from "react-native-paper";
+import { Portal } from "react-native-paper";
 
 export default function transaction() {
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,7 @@ export default function transaction() {
             <SaleTable />
           </View>
 
-          <View style={{ alignItems: "center" }}>
+          <View style={{ alignItems: "center", marginTop: 40 }}>
             <Text variant="titleMedium">Expense Table (No Receipt)</Text>
             <ExpenseTable />
           </View>

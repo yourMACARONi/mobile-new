@@ -1,7 +1,10 @@
-import { useState, useEffect } from "react";
-import { DataTable } from "react-native-paper";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, View } from "react-native";
+import { DataTable, Text } from "react-native-paper";
+import { useRouter } from "expo-router";
 import { getMonthlyNoReceiptSale } from "@/helper/statements";
-import { StyleSheet, View, TextStyle, ViewStyle } from "react-native";
+import TableSkeleton from "../skeleton/TableSkeleton";
+import { theme } from "@/constants/theme";
 
 type Sale = {
   id: number;
@@ -29,56 +32,97 @@ export default function SaleTable() {
   const [itemsPerPage, onItemsPerPageChange] = useState(
     numberOfItemsPerPageList[0]
   );
+  const [data, setData] = useState<Data[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [data, setData] = useState<Data[]>([]); // Holds array of data
+  const router = useRouter();
 
-  // Fetch data on component mount
   useEffect(() => {
     const getData = async () => {
-      const data = await getMonthlyNoReceiptSale();
-      setData(data); // Assume the API returns an array of Data objects
+      try {
+        const fetchedData = await getMonthlyNoReceiptSale();
+        setData(fetchedData);
+      } catch (error) {
+        console.error("Error fetching expense data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getData();
-  }, []); // Empty dependency array to fetch data only once when the component mounts
+  }, []);
 
   const from = page * itemsPerPage;
   const to = Math.min((page + 1) * itemsPerPage, data.length);
 
   useEffect(() => {
-    setPage(0); // Reset page on itemsPerPage change
+    setPage(0);
   }, [itemsPerPage]);
+
+  if (loading) {
+    return <TableSkeleton />;
+  }
 
   return (
     <View style={styles.container}>
-      <DataTable style={styles.table}>
-        <DataTable.Header style={styles.header}>
-          <DataTable.Title>Category</DataTable.Title>
-          <DataTable.Title>Description</DataTable.Title>
-          <DataTable.Title numeric>Amount</DataTable.Title>
-        </DataTable.Header>
+      <Text style={styles.title}>Monthly Sales</Text>
+      <View style={styles.tableContainer}>
+        <DataTable>
+          <DataTable.Header style={styles.header}>
+            <DataTable.Title textStyle={styles.headerText}>
+              Category
+            </DataTable.Title>
+            <DataTable.Title textStyle={styles.headerText}>
+              Description
+            </DataTable.Title>
+            <DataTable.Title numeric textStyle={styles.headerText}>
+              Amount
+            </DataTable.Title>
+          </DataTable.Header>
 
-        {data.slice(from, to).map((item) => (
-          <DataTable.Row key={item.sales.id} style={styles.row}>
-            <DataTable.Cell>{item.sales_category.name}</DataTable.Cell>
-            <DataTable.Cell>{item.sales?.description}</DataTable.Cell>
-            <DataTable.Cell numeric>{item.sales.amount}</DataTable.Cell>
-          </DataTable.Row>
-        ))}
+          {data.slice(from, to).map((item) => (
+            <DataTable.Row
+              key={item.sales.id}
+              onPress={() => {
+                router.navigate({
+                  pathname: "/(edit)/edit-transaction",
+                  params: {
+                    id: item.sales.id,
+                    description: item.sales.description,
+                    amount: item.sales.amount,
+                    category: item.sales.category,
+                    type: "sales",
+                  },
+                });
+              }}
+              style={styles.row}
+            >
+              <DataTable.Cell textStyle={styles.cellText}>
+                {item.sales_category.name}
+              </DataTable.Cell>
+              <DataTable.Cell textStyle={styles.cellText}>
+                {item.sales?.description}
+              </DataTable.Cell>
+              <DataTable.Cell numeric textStyle={styles.cellText}>
+                ₱{item.sales.amount.toLocaleString()}
+              </DataTable.Cell>
+            </DataTable.Row>
+          ))}
 
-        <DataTable.Pagination
-          page={page}
-          numberOfPages={Math.ceil(data.length / itemsPerPage)}
-          onPageChange={(page) => setPage(page)}
-          label={`${from + 1}-${to} of ${data.length}`}
-          numberOfItemsPerPageList={numberOfItemsPerPageList}
-          numberOfItemsPerPage={itemsPerPage}
-          onItemsPerPageChange={onItemsPerPageChange}
-          showFastPaginationControls
-          selectPageDropdownLabel={"Rows per page"}
-          style={styles.pagination}
-        />
-      </DataTable>
+          <DataTable.Pagination
+            page={page}
+            numberOfPages={Math.ceil(data.length / itemsPerPage)}
+            onPageChange={(page) => setPage(page)}
+            label={`${from + 1}-${to} of ${data.length}`}
+            numberOfItemsPerPageList={numberOfItemsPerPageList}
+            numberOfItemsPerPage={itemsPerPage}
+            onItemsPerPageChange={onItemsPerPageChange}
+            showFastPaginationControls
+            selectPageDropdownLabel={"Rows per page"}
+            style={styles.pagination}
+          />
+        </DataTable>
+      </View>
     </View>
   );
 }
@@ -86,30 +130,40 @@ export default function SaleTable() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f1fdf1", // Light green background
     padding: 16,
   },
-  table: {
-    backgroundColor: "#ffffff", // White background for the table
-    borderRadius: 8,
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 16,
+    color: theme.colors.primary,
+  },
+  tableContainer: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.roundness,
     overflow: "hidden",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   header: {
-    backgroundColor: "#4CAF50", // Green background for header
-    borderBottomWidth: 2,
-    borderBottomColor: "#388E3C", // Darker green for the border
+    backgroundColor: theme.colors.primary,
   },
-  titleText: {
-    color: "#fff", // White text for header
+  headerText: {
+    color: theme.colors.surface,
     fontWeight: "bold",
-  } as TextStyle, // Ensuring the correct TextStyle type
+  },
   row: {
     borderBottomWidth: 1,
-    borderBottomColor: "#E8F5E9", // Light green border for rows
+    borderBottomColor: theme.colors.background,
+  },
+  cellText: {
+    color: theme.colors.text,
   },
   pagination: {
-    backgroundColor: "#A5D6A7", // Green background for pagination
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
   },
 });

@@ -4,6 +4,7 @@ import { PieChart } from "react-native-chart-kit";
 import { useState, useEffect } from "react";
 import { getMonthlyStatement } from "@/helper/statements";
 import { Card } from "react-native-paper";
+import SalesExpensePieChartSkeleton from "../skeleton/SalesExpensePieChartSkeleton";
 
 interface DataProps {
   sales: {
@@ -36,14 +37,14 @@ const SalesExpensePieChart: React.FC<SalesExpensePieChartProps> = ({
   const chartData = [
     {
       name: "",
-      population: data.sales.currenMonthSales,
+      population: parseFloat(data.sales.currenMonthSales.toFixed(2)),
       color: "green", // Soft green
       legendFontColor: "#333333",
       legendFontSize: 15,
     },
     {
       name: "",
-      population: data.expense.currenMonthExpense,
+      population: parseFloat(data.expense.currenMonthExpense.toFixed(2)),
       color: "red", // Soft red
       legendFontColor: "#333333",
       legendFontSize: 15,
@@ -108,16 +109,27 @@ const defaultData: DataProps = {
 };
 
 export default function Chart() {
-  const [data, setData] = useState<DataProps>();
+  const [data, setData] = useState<DataProps | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getStatement = async () => {
-      const statement = await getMonthlyStatement();
-      setData(statement);
+      try {
+        const statement = await getMonthlyStatement();
+        setData(statement);
+      } catch (error) {
+        console.error("Error fetching monthly statement:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getStatement();
   }, []);
+
+  if (loading) {
+    return <SalesExpensePieChartSkeleton />;
+  }
 
   return <SalesExpensePieChart data={data || defaultData} />;
 }

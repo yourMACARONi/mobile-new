@@ -1,9 +1,6 @@
 import {
-  Image,
   StyleSheet,
-  Platform,
   View,
-  Alert,
   RefreshControl,
   ActivityIndicator,
 } from "react-native";
@@ -33,7 +30,6 @@ export default function HomeScreen() {
       } catch (error) {
         await removeSession();
         router.replace("/");
-        console.log(error);
       }
     };
     request();

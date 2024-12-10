@@ -5,15 +5,7 @@ import {
   PaperProvider,
 } from "react-native-paper";
 import { ReceiptProvider } from "@/provider/ReceiptProvider";
-
-const theme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: "green",
-    secondary: "yellow",
-  },
-};
+import { theme } from "../constants/theme";
 
 export default function Main() {
   return (
