@@ -91,6 +91,7 @@ export default function SaleTable() {
                     description: item.sales.description,
                     amount: item.sales.amount,
                     category: item.sales.category,
+                    category_name: item.sales_category.name,
                     type: "sales",
                   },
                 });

@@ -91,6 +91,7 @@ export default function ExpenseTable() {
                     description: item.expenses.description,
                     amount: item.expenses.amount,
                     category: item.expenses.category,
+                    category_name: item.expense_category.name,
                     type: "expense",
                   },
                 });

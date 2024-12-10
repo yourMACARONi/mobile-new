@@ -1,7 +1,7 @@
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Formik } from "formik";
-import { TextInput, Button, DefaultTheme } from "react-native-paper";
+import { TextInput, Button } from "react-native-paper";
 import { View, Text, StyleSheet, KeyboardAvoidingView } from "react-native";
 import { SaleTransactionSchema } from "@/constants/schema";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -11,12 +11,23 @@ import {
   updateSalesTransaction,
   updateExpenseTransaction,
 } from "@/helper/transaction";
+import { getSaleCategories, getExpenseCategories } from "@/helper/categories";
+import { useState, useEffect } from "react";
+import { SelectList } from "react-native-dropdown-select-list";
+
+const data = [
+  {
+    id: 1001,
+    name: "test",
+    description: "test",
+  },
+];
 
 export default function TransactionForm() {
   const params = useLocalSearchParams();
   const router = useRouter();
 
-  const { type, category } = params;
+  const { type, category, category_name } = params;
 
   const { id, description, amount } = {
     id: Array.isArray(params.id) ? params.id[0] : params.id,
@@ -26,17 +37,49 @@ export default function TransactionForm() {
     amount: Array.isArray(params.amount) ? params.amount[0] : params.amount,
   };
 
-  const handleFormSubmit = async (body: unknown) => {
+  const handleFormSubmit = async (body: object) => {
     if (type === "sales") {
-      const req = await updateSalesTransaction(body);
-
+      const req = await updateSalesTransaction({
+        ...body,
+        category: selected,
+      });
       router.dismiss();
     } else {
-      const req = await updateExpenseTransaction(body);
-
+      const req = await updateExpenseTransaction({
+        ...body,
+        category: selected,
+      });
       router.dismiss();
     }
   };
+
+  const [selected, setSelected] = useState("");
+  const [categories, setCategories] = useState<any[]>([]); // Initialize as an empty array
+
+  useEffect(() => {
+    const getCategory = async () => {
+      if (type === "sales") {
+        const category = await getSaleCategories();
+        if (category) {
+          const formattedCategory = category?.map((_item: any) => ({
+            key: _item?.id,
+            value: _item?.name,
+          }));
+          setCategories(formattedCategory);
+        }
+      } else {
+        const category = await getExpenseCategories();
+        if (category) {
+          const formattedCategory = category?.map((_item: any) => ({
+            key: _item?.id,
+            value: _item?.name,
+          }));
+          setCategories(formattedCategory);
+        }
+      }
+    };
+    getCategory();
+  }, [type]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -82,6 +125,18 @@ export default function TransactionForm() {
               <Text style={styles.errorText}>{errors.description}</Text>
             )}
 
+            {/* SelectList */}
+            <SelectList
+              setSelected={setSelected}
+              data={categories}
+              defaultOption={{
+                key: category,
+                value: category_name,
+              }}
+              save="key"
+              placeholder="Categories"
+            />
+
             {/* Amount Field */}
             <TextInput
               label="Amount"
@@ -97,6 +152,7 @@ export default function TransactionForm() {
               <Text style={styles.errorText}>{errors.amount}</Text>
             )}
 
+            {/* Submit Button */}
             <Button
               onPress={() => handleSubmit()}
               mode="contained"
@@ -105,8 +161,10 @@ export default function TransactionForm() {
               loading={isSubmitting}
               icon={"send"}
             >
-              Update Transcation
+              Update Transaction
             </Button>
+
+            {/* Cancel Button */}
             <Button
               onPress={() => {
                 router.replace("/(tabs)/transaction");
@@ -118,7 +176,7 @@ export default function TransactionForm() {
               loading={isSubmitting}
               icon={"cancel"}
             >
-              Cancel Transcation
+              Cancel Transaction
             </Button>
           </KeyboardAvoidingView>
         )}
@@ -160,11 +218,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   button: {
-    marginTop: 16,
-    paddingVertical: 8,
-  },
-  buttonCancel: {
-    color: "red",
     marginTop: 16,
     paddingVertical: 8,
   },

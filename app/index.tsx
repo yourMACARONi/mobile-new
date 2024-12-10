@@ -22,6 +22,8 @@ export default function LoginScreen() {
     return <View />;
   }
 
+  //router.push("/(edit)/edit-transaction");
+
   const handleBarCodeScanned = async (result: BarcodeScanningResult) => {
     setIsLoading(false);
     const { data } = result;
