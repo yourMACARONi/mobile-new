@@ -16,6 +16,7 @@ import { getUser, removeSession } from "@/helper/session";
 import { useRouter } from "expo-router";
 import { Text } from "react-native-paper";
 import Transactions from "@/components/features/Transactions";
+import Chart from "@/components/features/SalesExpensePieChart";
 
 export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
@@ -31,7 +32,7 @@ export default function HomeScreen() {
         const user = await getUser();
       } catch (error) {
         await removeSession();
-        router.replace("/index");
+        router.replace("/");
       }
     };
     request();
@@ -50,7 +51,6 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.headerText}>DASHBOARD</Text>
       {loading ? (
         <View
           style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
@@ -63,10 +63,14 @@ export default function HomeScreen() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
+          <Text style={styles.headerText}>DASHBOARD</Text>
           <View style={{ margin: 20 }}>
             <SummaryCards />
           </View>
-
+          //Chart
+          <View>
+            <Chart />
+          </View>
           <View style={{ padding: 5 }}>
             <Text variant="labelLarge">
               Recent Transactions ( With Receipt )

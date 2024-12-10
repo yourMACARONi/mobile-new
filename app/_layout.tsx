@@ -4,7 +4,7 @@ import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ReceiptProvider } from "@/provider/ReceiptProvider";
 
 const theme = {
   ...DefaultTheme,
@@ -18,7 +18,9 @@ const theme = {
 export default function Main() {
   return (
     <PaperProvider theme={theme}>
-      <Slot />
+      <ReceiptProvider>
+        <Slot />
+      </ReceiptProvider>
     </PaperProvider>
   );
 }

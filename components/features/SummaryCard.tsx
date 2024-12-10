@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { expense, sales, total } from "@/constants/types";
 import { getStatement } from "@/helper/statements";
 import MetricCardSkeleton from "../skeleton/MetricCardSkeleton";

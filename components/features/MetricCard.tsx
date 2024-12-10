@@ -1,6 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Dimensions } from "react-native";
-import { Text } from "react-native-paper";
+import { View, StyleSheet, Dimensions, Text } from "react-native";
 import { Image } from "react-native";
 
 interface MetricCardProps {
