@@ -18,9 +18,9 @@ type Receipt = {
 
 export default function Transactions() {
   const [page, setPage] = useState<number>(0);
-  const [numberOfItemsPerPageList] = useState([2, 3, 4]);
+  const [numberOfItemsPerPageList] = useState([2, 3, 4, 5]);
   const [itemsPerPage, onItemsPerPageChange] = useState(
-    numberOfItemsPerPageList[0]
+    numberOfItemsPerPageList[3]
   );
   const [receipts, setReceipts] = useState<Receipt[]>([]);
 

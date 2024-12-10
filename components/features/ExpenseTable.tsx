@@ -28,9 +28,9 @@ type Data = {
 
 export default function ExpenseTable() {
   const [page, setPage] = useState<number>(0);
-  const [numberOfItemsPerPageList] = useState([2, 3, 4]);
+  const [numberOfItemsPerPageList] = useState([2, 3, 4, 5]);
   const [itemsPerPage, onItemsPerPageChange] = useState(
-    numberOfItemsPerPageList[0]
+    numberOfItemsPerPageList[3]
   );
   const [data, setData] = useState<Data[]>([]);
   const [loading, setLoading] = useState(true);
