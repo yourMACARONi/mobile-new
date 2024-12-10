@@ -1,63 +1,92 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import {
+  Image,
+  StyleSheet,
+  Platform,
+  View,
+  Alert,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Button } from "react-native-paper";
+import SummaryCards from "@/components/features/SummaryCard";
+import { ScrollView } from "react-native";
+import { useCallback, useState, useEffect } from "react";
+import { getUser, removeSession } from "@/helper/session";
+import { useRouter } from "expo-router";
+import { Text } from "react-native-paper";
+import Transactions from "@/components/features/Transactions";
 
 export default function HomeScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
+
+  //check session
+  useEffect(() => {
+    const request = async () => {
+      try {
+        setLoading(true);
+        const user = await getUser();
+      } catch (error) {
+        await removeSession();
+        router.replace("/index");
+      }
+    };
+    request();
+    setLoading(false);
+  }, []);
+
+  //for refresh
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setLoading(true);
+    setTimeout(() => {
+      setRefreshing(false);
+      setLoading(false);
+    }, 2000);
+  }, []);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.headerText}>DASHBOARD</Text>
+      {loading ? (
+        <View
+          style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
+        >
+          <ActivityIndicator size="large" />
+        </View>
+      ) : (
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          <View style={{ margin: 20 }}>
+            <SummaryCards />
+          </View>
+
+          <View style={{ padding: 5 }}>
+            <Text variant="labelLarge">
+              Recent Transactions ( With Receipt )
+            </Text>
+            <Transactions />
+          </View>
+        </ScrollView>
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
   titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   stepContainer: {
@@ -69,6 +98,19 @@ const styles = StyleSheet.create({
     width: 290,
     bottom: 0,
     left: 0,
-    position: 'absolute',
+    position: "absolute",
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: "pink",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerText: {
+    padding: 5,
+    marginLeft: 10,
+    color: "#17202A",
+    fontSize: 36,
+    fontWeight: "bold",
   },
 });

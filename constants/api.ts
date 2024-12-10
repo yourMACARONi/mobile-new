@@ -1,0 +1,1 @@
+export const NEXT_API_URL = 'https://dashboard.jwisnetwork.com';
