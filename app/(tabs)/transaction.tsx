@@ -78,16 +78,15 @@ export default function Transaction() {
           </Text>
         </TouchableOpacity>
       </Animated.View>
-      <SafeAreaView style={styles.contentContainer}>
+      <View style={styles.contentContainer}>
         {hasReceipt ? <SummaryCards /> : <NoReceiptTransactionView />}
-      </SafeAreaView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "white",
   },
   buttonContainer: {
@@ -127,6 +126,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   contentContainer: {
-    marginTop: 90,
+    marginTop: 120,
   },
 });
