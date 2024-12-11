@@ -82,7 +82,12 @@ export default function ReceiptTable() {
                     id: item?.id,
                     receipt_number: item?.receipt_number,
                     receipt_type: item?.receipt_type,
+                    delivered_by: item?.delivered_by,
+                    delivered_to: item?.delivered_to,
+                    address: item?.address,
                     total: item?.total,
+                    date: item?.date,
+                    type: "receipt",
                   },
                 });
               }}

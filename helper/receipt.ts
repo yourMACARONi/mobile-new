@@ -52,3 +52,23 @@ export const saveReceiptContent = async (receipt: unknown) => {
         console.log(error)
     }
 }
+
+export const patchReceiptContent = async (receipt: unknown) => {
+    const session = await getSession();
+    try {
+        const req = await fetch(`${NEXT_API_URL}/api/receipt`, {
+            method: "PATCH",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session}`
+            },
+            body: JSON.stringify(receipt)
+        });
+        const data = await req.json();
+        
+        return req;
+
+    } catch (error) {
+        console.log(error)
+    }
+}

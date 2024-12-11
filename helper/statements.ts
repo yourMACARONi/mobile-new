@@ -9,7 +9,8 @@ export const getStatement = async () => {
     method: "GET",
     headers: {
       'Authorization': `Bearer ${session}`
-    }
+    },
+    cache: 'no-store'
   });
 
   if (req.ok) {
@@ -27,7 +28,8 @@ export const getMonthlyTransactionReceipt = async () => {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${session}`
-        }
+        },
+        cache: 'no-store'
       });
     
       if (req.ok) {
@@ -45,7 +47,8 @@ export const getMonthlyStatement = async () => {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${session}`
-        }
+        },
+        cache: 'no-store'
       });
     
       if (req.ok) {
@@ -63,7 +66,8 @@ export const getMonthlyNoReceiptExpense = async () => {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${session}`
-        }
+        },
+        cache: 'no-store'
       });
     
       if (req.ok) {
@@ -81,7 +85,8 @@ export const getMonthlyNoReceiptSale = async () => {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${session}`
-        }
+        },
+        cache: 'no-store'
       });
     
       if (req.ok) {

@@ -37,7 +37,12 @@ export default function NoReceiptTransactionForm() {
   const initialDate = typeof date === "string" ? new Date(date) : undefined;
 
   const handleFormSubmit = async (body: TransactionFormDataType) => {
-    const formattedDate = body.date.toISOString().split("T")[0];
+    // Manually adjust the time zone offset for Asia/Manila (UTC+8)
+    const dateInManila = new Date(body.date);
+    dateInManila.setHours(dateInManila.getHours() + 8);
+
+    const formattedDate = dateInManila.toISOString().split("T")[0];
+
     if (type === "sales") {
       const req = await updateSalesTransaction({
         ...body,
