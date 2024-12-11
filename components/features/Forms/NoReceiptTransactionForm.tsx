@@ -15,40 +15,41 @@ import { getSaleCategories, getExpenseCategories } from "@/helper/categories";
 import { useState, useEffect } from "react";
 import { SelectList } from "react-native-dropdown-select-list";
 import { Platform } from "react-native";
+import { DatePickerInput } from "react-native-paper-dates";
+import { TransactionFormDataType } from "@/constants/schema";
 
-const data = [
-  {
-    id: 1001,
-    name: "test",
-    description: "test",
-  },
-];
-
-export default function TransactionForm() {
+export default function NoReceiptTransactionForm() {
   const params = useLocalSearchParams();
   const router = useRouter();
 
-  const { type, category, category_name } = params;
+  const { type, category, category_name, date } = params;
 
   const { id, description, amount } = {
-    id: Array.isArray(params.id) ? params.id[0] : params.id,
+    id: Array.isArray(params.id) ? Number(params.id[0]) : Number(params.id), // Ensure id is a number
     description: Array.isArray(params.description)
       ? params.description[0]
       : params.description,
-    amount: Array.isArray(params.amount) ? params.amount[0] : params.amount,
+    amount: Array.isArray(params.amount)
+      ? Number(params.amount[0])
+      : Number(params.amount),
   };
 
-  const handleFormSubmit = async (body: object) => {
+  const initialDate = typeof date === "string" ? new Date(date) : undefined;
+
+  const handleFormSubmit = async (body: TransactionFormDataType) => {
+    const formattedDate = body.date.toISOString().split("T")[0];
     if (type === "sales") {
       const req = await updateSalesTransaction({
         ...body,
         category: selected,
+        date: formattedDate,
       });
       router.dismiss();
     } else {
       const req = await updateExpenseTransaction({
         ...body,
         category: selected,
+        date: formattedDate,
       });
       router.dismiss();
     }
@@ -89,7 +90,8 @@ export default function TransactionForm() {
           id: id,
           description: description,
           amount: amount,
-          category: category,
+          category: Number(category),
+          date: initialDate as Date,
         }}
         validationSchema={SaleTransactionSchema}
         onSubmit={handleFormSubmit}
@@ -99,6 +101,7 @@ export default function TransactionForm() {
           handleBlur,
           handleSubmit,
           isSubmitting,
+          setFieldValue,
           values,
           errors,
           touched,
@@ -147,7 +150,7 @@ export default function TransactionForm() {
                 keyboardType="numeric"
                 onChangeText={handleChange("amount")}
                 onBlur={handleBlur("amount")}
-                value={values.amount}
+                value={String(values.amount)}
                 mode="outlined"
                 style={styles.input}
                 error={touched.amount && !!errors.amount}
@@ -155,6 +158,23 @@ export default function TransactionForm() {
               {touched.amount && errors.amount && (
                 <Text style={styles.errorText}>{errors.amount}</Text>
               )}
+
+              <View style={{ marginTop: 30 }}>
+                <DatePickerInput
+                  presentationStyle="pageSheet"
+                  locale="en"
+                  label="Transaction Date"
+                  value={values.date}
+                  style={{
+                    backgroundColor: "white",
+                    borderColor: "black",
+                    borderRadius: 2,
+                    borderStyle: "solid",
+                  }}
+                  onChange={(newDate) => setFieldValue("date", newDate)}
+                  inputMode="start"
+                />
+              </View>
             </View>
 
             <View style={{ marginBottom: 20 }}>

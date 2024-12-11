@@ -1,61 +1,80 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
-import { DataTable } from "react-native-paper";
-import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect } from "react";
+import { View, StyleSheet, Animated, Dimensions } from "react-native";
 
-const SkeletonCell: React.FC<{ width: number }> = ({ width }) => (
-  <View style={[styles.skeletonCell, { width }]}>
-    <LinearGradient
-      colors={["#f0f0f0", "#e0e0e0", "#f0f0f0"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={StyleSheet.absoluteFill}
-    />
-  </View>
-);
+const { width } = Dimensions.get("window");
+
+const useShimmerAnimation = () => {
+  const shimmerAnimation = new Animated.Value(0);
+
+  useEffect(() => {
+    const shimmer = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnimation, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnimation, {
+          toValue: 0,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    shimmer.start();
+
+    return () => shimmer.stop();
+  }, [shimmerAnimation]);
+
+  return shimmerAnimation;
+};
+
+const SkeletonCell: React.FC<{ width: number }> = ({ width: cellWidth }) => {
+  const shimmerAnimation = useShimmerAnimation();
+
+  const translateX = shimmerAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-cellWidth, cellWidth],
+  });
+
+  return (
+    <View style={[styles.skeletonCell, { width: cellWidth }]}>
+      <Animated.View
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: "rgba(255, 255, 255, 0.5)",
+            transform: [{ translateX }],
+          },
+        ]}
+      />
+    </View>
+  );
+};
 
 const TableSkeleton: React.FC = () => {
   return (
     <View style={styles.container}>
-      <DataTable>
-        <DataTable.Header>
-          <DataTable.Title>
-            <SkeletonCell width={80} />
-          </DataTable.Title>
-          <DataTable.Title>
-            <SkeletonCell width={120} />
-          </DataTable.Title>
-          <DataTable.Title numeric>
-            <SkeletonCell width={60} />
-          </DataTable.Title>
-        </DataTable.Header>
+      <View style={styles.table}>
+        <View style={styles.header}>
+          <SkeletonCell width={80} />
+          <SkeletonCell width={120} />
+          <SkeletonCell width={60} />
+        </View>
 
-        {[...Array(3)].map((_, index) => (
-          <DataTable.Row key={index}>
-            <DataTable.Cell>
-              <SkeletonCell width={80} />
-            </DataTable.Cell>
-            <DataTable.Cell>
-              <SkeletonCell width={120} />
-            </DataTable.Cell>
-            <DataTable.Cell numeric>
-              <SkeletonCell width={60} />
-            </DataTable.Cell>
-          </DataTable.Row>
+        {[...Array(5)].map((_, index) => (
+          <View key={index} style={styles.row}>
+            <SkeletonCell width={80} />
+            <SkeletonCell width={120} />
+            <SkeletonCell width={60} />
+          </View>
         ))}
 
-        <DataTable.Pagination
-          page={0}
-          numberOfPages={1}
-          onPageChange={() => {}}
-          label={<SkeletonCell width={100} />}
-          showFastPaginationControls
-          numberOfItemsPerPageList={[]}
-          numberOfItemsPerPage={3}
-          onItemsPerPageChange={() => {}}
-          selectPageDropdownLabel={<SkeletonCell width={80} />}
-        />
-      </DataTable>
+        <View style={styles.pagination}>
+          <SkeletonCell width={100} />
+          <SkeletonCell width={80} />
+        </View>
+      </View>
     </View>
   );
 };
@@ -64,26 +83,43 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: "#f8f9fa",
   },
   table: {
     borderRadius: 8,
     overflow: "hidden",
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   header: {
-    borderBottomWidth: 2,
-    borderBottomColor: "#FF4C4C",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e9ecef",
   },
   row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#FFE5E5",
+    borderBottomColor: "#f1f3f5",
   },
   pagination: {
-    paddingVertical: 8,
-    borderRadius: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#e9ecef",
   },
   skeletonCell: {
     height: 20,
     borderRadius: 4,
+    backgroundColor: "#e9ecef",
     overflow: "hidden",
   },
 });

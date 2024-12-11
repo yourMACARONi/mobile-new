@@ -1,10 +1,8 @@
-import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, View, ScrollView, RefreshControl } from "react-native";
 import ExpenseTable from "@/components/features/ExpenseTable";
 import SaleTable from "@/components/features/SaleTable";
 import { useCallback, useState } from "react";
 import LoadingIndicator from "@/components/ui/LoadingIndicator";
-import { Text } from "react-native-paper";
 
 export default function NoReceiptTransactionView() {
   const [loading, setLoading] = useState(false);

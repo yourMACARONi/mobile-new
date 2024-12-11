@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import SummaryCards from "@/components/features/SummaryCard";
 import NoReceiptTransactionView from "@/components/features/TransactionTable/NoReceiptTransactionView copy";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ReceiptTransactionView from "@/components/features/TransactionTable/ReceiptTransacitonView";
 
 const { width } = Dimensions.get("window");
 
@@ -79,7 +80,7 @@ export default function Transaction() {
         </TouchableOpacity>
       </Animated.View>
       <View style={styles.contentContainer}>
-        {hasReceipt ? <SummaryCards /> : <NoReceiptTransactionView />}
+        {hasReceipt ? <ReceiptTransactionView /> : <NoReceiptTransactionView />}
       </View>
     </View>
   );

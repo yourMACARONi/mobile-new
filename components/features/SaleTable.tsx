@@ -93,6 +93,7 @@ export default function SaleTable() {
                     category: item.sales.category,
                     category_name: item.sales_category.name,
                     type: "sales",
+                    date: item.sales.date,
                   },
                 });
               }}

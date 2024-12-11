@@ -93,6 +93,7 @@ export default function ExpenseTable() {
                     category: item.expenses.category,
                     category_name: item.expense_category.name,
                     type: "expense",
+                    date: item.expenses.date,
                   },
                 });
               }}

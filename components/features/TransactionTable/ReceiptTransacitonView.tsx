@@ -1,10 +1,7 @@
-import { SafeAreaView } from "react-native-safe-area-context";
 import { StyleSheet, View, ScrollView, RefreshControl } from "react-native";
-import ExpenseTable from "@/components/features/ExpenseTable";
-import SaleTable from "@/components/features/SaleTable";
 import { useCallback, useState } from "react";
 import LoadingIndicator from "@/components/ui/LoadingIndicator";
-import { Text } from "react-native-paper";
+import ReceiptTable from "../ReceiptTable";
 
 export default function ReceiptTransactionView() {
   const [loading, setLoading] = useState(false);
@@ -21,7 +18,7 @@ export default function ReceiptTransactionView() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {loading ? (
         <LoadingIndicator />
       ) : (
@@ -33,22 +30,17 @@ export default function ReceiptTransactionView() {
           {/** no receipt table */}
           <View>
             <View style={{ alignItems: "center" }}>
-              <SaleTable />
-            </View>
-
-            <View style={{ alignItems: "center", marginTop: 40 }}>
-              <ExpenseTable />
+              <ReceiptTable />
             </View>
           </View>
         </ScrollView>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "white",
   },
   headerImage: {

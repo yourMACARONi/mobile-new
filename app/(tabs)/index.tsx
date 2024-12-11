@@ -12,8 +12,8 @@ import { useCallback, useState, useEffect } from "react";
 import { getUser, removeSession } from "@/helper/session";
 import { useRouter } from "expo-router";
 import { Text } from "react-native-paper";
-import Transactions from "@/components/features/ReceiptTable";
 import Chart from "@/components/features/SalesExpensePieChart";
+import ReceiptTable from "@/components/features/ReceiptTable";
 
 export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
@@ -71,7 +71,7 @@ export default function HomeScreen() {
             <Text variant="labelLarge">
               Recent Transactions ( With Receipt )
             </Text>
-            <Transactions />
+            <ReceiptTable />
           </View>
         </ScrollView>
       )}
