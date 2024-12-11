@@ -63,16 +63,13 @@ const TableSkeleton: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f1fdf1",
     padding: 16,
   },
   table: {
-    backgroundColor: "#ffffff",
     borderRadius: 8,
     overflow: "hidden",
   },
   header: {
-    backgroundColor: "#FF6F6F",
     borderBottomWidth: 2,
     borderBottomColor: "#FF4C4C",
   },
@@ -81,7 +78,6 @@ const styles = StyleSheet.create({
     borderBottomColor: "#FFE5E5",
   },
   pagination: {
-    backgroundColor: "#FFB3B3",
     paddingVertical: 8,
     borderRadius: 8,
   },

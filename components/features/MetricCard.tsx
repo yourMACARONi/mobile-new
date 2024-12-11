@@ -36,7 +36,7 @@ export default function MetricCard({
               change >= 0 ? styles.greenText : styles.redText,
             ]}
           >
-            {change >= 0 ? "⬈ " : "⬊ "}
+            {change >= 0 ? "⬈ " : "⬊"}
             {change}% from last month
           </Text>
         </View>

@@ -1,48 +1,87 @@
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Animated,
+  Dimensions,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import SummaryCards from "@/components/features/SummaryCard";
+import NoReceiptTransactionView from "@/components/features/TransactionTable/NoReceiptTransactionView copy";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StyleSheet, View, ScrollView, RefreshControl } from "react-native";
-import ExpenseTable from "@/components/features/ExpenseTable";
-import SaleTable from "@/components/features/SaleTable";
-import { useCallback, useState } from "react";
-import LoadingIndicator from "@/components/ui/LoadingIndicator";
-import { Text } from "react-native-paper";
-import { Portal } from "react-native-paper";
 
-export default function transaction() {
-  const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+const { width } = Dimensions.get("window");
 
-  //scroll refresh
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    setLoading(true);
-    setTimeout(() => {
-      setRefreshing(false);
-      setLoading(false);
-    }, 2000);
-  }, []);
+export default function Transaction() {
+  const [hasReceipt, setHasReceipt] = useState(false);
+  const animation = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(animation, {
+      toValue: hasReceipt ? 1 : 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [hasReceipt]);
+
+  const toggleReceipt = () => {
+    setHasReceipt(!hasReceipt);
+  };
+
+  const buttonWidth = width * 0.4;
+  const buttonTranslate = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, buttonWidth],
+  });
 
   return (
-    <SafeAreaView style={styles.container}>
-      {loading ? (
-        <LoadingIndicator />
-      ) : (
-        <ScrollView
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        >
-          <View style={{ alignItems: "center" }}>
-            <Text variant="titleMedium">Sales Table (No Receipt)</Text>
-            <SaleTable />
-          </View>
-
-          <View style={{ alignItems: "center", marginTop: 40 }}>
-            <Text variant="titleMedium">Expense Table (No Receipt)</Text>
-            <ExpenseTable />
-          </View>
-        </ScrollView>
-      )}
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Animated.View
+        style={[styles.buttonContainer, { width: buttonWidth * 2 }]}
+      >
+        <Animated.View
+          style={[
+            styles.slider,
+            { transform: [{ translateX: buttonTranslate }] },
+          ]}
+        />
+        <TouchableOpacity style={styles.button} onPress={toggleReceipt}>
+          <Ionicons
+            name="receipt-outline"
+            size={24}
+            color={hasReceipt ? "#007AFF" : "#ffffff"}
+          />
+          <Text
+            style={[
+              styles.buttonText,
+              { color: hasReceipt ? "#007AFF" : "#ffffff" },
+            ]}
+          >
+            Without
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={toggleReceipt}>
+          <Ionicons
+            name="receipt"
+            size={24}
+            color={hasReceipt ? "#ffffff" : "#007AFF"}
+          />
+          <Text
+            style={[
+              styles.buttonText,
+              { color: hasReceipt ? "#ffffff" : "#007AFF" },
+            ]}
+          >
+            With
+          </Text>
+        </TouchableOpacity>
+      </Animated.View>
+      <SafeAreaView style={styles.contentContainer}>
+        {hasReceipt ? <SummaryCards /> : <NoReceiptTransactionView />}
+      </SafeAreaView>
+    </View>
   );
 }
 
@@ -51,14 +90,43 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
-  titleContainer: {
+  buttonContainer: {
     flexDirection: "row",
-    gap: 8,
+    justifyContent: "space-between",
+    alignItems: "center",
+    position: "absolute",
+    top: 50,
+    left: "50%",
+    transform: [{ translateX: -width * 0.4 }],
+    height: 60,
+    backgroundColor: "#ffffff",
+    borderRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 1,
+  },
+  slider: {
+    position: "absolute",
+    width: "50%",
+    height: "100%",
+    backgroundColor: "#007AFF",
+    borderRadius: 30,
+  },
+  button: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText: {
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  contentContainer: {
+    marginTop: 90,
   },
 });

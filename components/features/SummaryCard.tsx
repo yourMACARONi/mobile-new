@@ -86,7 +86,7 @@ export default function SummaryCards() {
               title="Monthly Income"
               amount={`₱${total?.total.toLocaleString()}`}
               change={
-                total?.trends == "Infinity" || null
+                total?.trends == "Infinity" || null || "-Infinity"
                   ? 0
                   : Number(total?.trends) || 0
               }

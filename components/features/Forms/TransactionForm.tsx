@@ -14,6 +14,7 @@ import {
 import { getSaleCategories, getExpenseCategories } from "@/helper/categories";
 import { useState, useEffect } from "react";
 import { SelectList } from "react-native-dropdown-select-list";
+import { Platform } from "react-native";
 
 const data = [
   {
@@ -102,81 +103,87 @@ export default function TransactionForm() {
           errors,
           touched,
         }) => (
-          <KeyboardAvoidingView style={styles.formContainer}>
-            <Text style={styles.title}>
-              Edit{" "}
-              {typeof type === "string"
-                ? type.charAt(0).toUpperCase() + type.slice(1)
-                : "Invalid type"}{" "}
-              Transaction Form
-            </Text>
+          <KeyboardAvoidingView
+            style={styles.formContainer}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+          >
+            <View>
+              {/* Description Field */}
+              <Text style={styles.title}>
+                Edit{" "}
+                {typeof type === "string"
+                  ? type.charAt(0).toUpperCase() + type.slice(1)
+                  : "Invalid type"}{" "}
+                Transaction Form
+              </Text>
+              <TextInput
+                label="Description"
+                onChangeText={handleChange("description")}
+                onBlur={handleBlur("description")}
+                value={values.description}
+                mode="outlined"
+                style={styles.input}
+                error={touched.description && !!errors.description}
+              />
+              {touched.description && errors.description && (
+                <Text style={styles.errorText}>{errors.description}</Text>
+              )}
 
-            {/* Description Field */}
-            <TextInput
-              label="Description"
-              onChangeText={handleChange("description")}
-              onBlur={handleBlur("description")}
-              value={values.description}
-              mode="outlined"
-              style={styles.input}
-              error={touched.description && !!errors.description}
-            />
-            {touched.description && errors.description && (
-              <Text style={styles.errorText}>{errors.description}</Text>
-            )}
+              {/* SelectList */}
+              <SelectList
+                setSelected={setSelected}
+                data={categories}
+                defaultOption={{
+                  key: category,
+                  value: category_name,
+                }}
+                save="key"
+                placeholder="Categories"
+              />
 
-            {/* SelectList */}
-            <SelectList
-              setSelected={setSelected}
-              data={categories}
-              defaultOption={{
-                key: category,
-                value: category_name,
-              }}
-              save="key"
-              placeholder="Categories"
-            />
+              {/* Amount Field */}
+              <TextInput
+                label="Amount"
+                keyboardType="numeric"
+                onChangeText={handleChange("amount")}
+                onBlur={handleBlur("amount")}
+                value={values.amount}
+                mode="outlined"
+                style={styles.input}
+                error={touched.amount && !!errors.amount}
+              />
+              {touched.amount && errors.amount && (
+                <Text style={styles.errorText}>{errors.amount}</Text>
+              )}
+            </View>
 
-            {/* Amount Field */}
-            <TextInput
-              label="Amount"
-              keyboardType="numeric"
-              onChangeText={handleChange("amount")}
-              onBlur={handleBlur("amount")}
-              value={values.amount}
-              mode="outlined"
-              style={styles.input}
-              error={touched.amount && !!errors.amount}
-            />
-            {touched.amount && errors.amount && (
-              <Text style={styles.errorText}>{errors.amount}</Text>
-            )}
+            <View style={{ marginBottom: 20 }}>
+              {/* Submit Button */}
+              <Button
+                onPress={() => handleSubmit()}
+                mode="contained"
+                style={styles.button}
+                labelStyle={styles.buttonLabel}
+                loading={isSubmitting}
+                // icon={"send"}
+              >
+                Update Transaction
+              </Button>
 
-            {/* Submit Button */}
-            <Button
-              onPress={() => handleSubmit()}
-              mode="contained"
-              style={styles.button}
-              labelStyle={styles.buttonLabel}
-              loading={isSubmitting}
-              // icon={"send"}
-            >
-              Update Transaction
-            </Button>
-
-            {/* Cancel Button */}
-            <Button
-              onPress={() => {
-                router.replace("/(tabs)/transaction");
-              }}
-              mode="contained"
-              style={styles.button}
-              buttonColor="red"
-              labelStyle={styles.buttonLabel}
-              // icon={"cancel"}
-            >
-              Cancel Transaction
-            </Button>
+              {/* Cancel Button */}
+              <Button
+                onPress={() => {
+                  router.replace("/(tabs)/transaction");
+                }}
+                mode="contained"
+                style={styles.button}
+                buttonColor="red"
+                labelStyle={styles.buttonLabel}
+                // icon={"cancel"}
+              >
+                Cancel Transaction
+              </Button>
+            </View>
           </KeyboardAvoidingView>
         )}
       </Formik>
@@ -191,6 +198,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   formContainer: {
+    flex: 1,
+    justifyContent: "space-between",
     padding: 16,
     backgroundColor: theme.colors.surface,
     borderRadius: theme.roundness,
