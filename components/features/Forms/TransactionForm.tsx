@@ -159,7 +159,7 @@ export default function TransactionForm() {
               style={styles.button}
               labelStyle={styles.buttonLabel}
               loading={isSubmitting}
-              icon={"send"}
+              // icon={"send"}
             >
               Update Transaction
             </Button>
@@ -173,7 +173,7 @@ export default function TransactionForm() {
               style={styles.button}
               buttonColor="red"
               labelStyle={styles.buttonLabel}
-              icon={"cancel"}
+              // icon={"cancel"}
             >
               Cancel Transaction
             </Button>
