@@ -169,6 +169,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 20,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 4,
   },
 });
