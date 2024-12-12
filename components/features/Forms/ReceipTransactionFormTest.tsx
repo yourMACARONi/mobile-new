@@ -16,7 +16,8 @@ import * as Yup from "yup";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SelectList } from "react-native-dropdown-select-list";
 import { patchReceiptContent, getReceiptContentById } from "@/helper/receipt";
-import { ReceiptData, ReceiptItem } from "@/constants/types";
+import { ReceiptData } from "@/constants/types";
+import TransactionFormLoading from "@/components/skeleton/TransactionFormSkeleton";
 
 const validationSchema = Yup.object().shape({
   receipt_number: Yup.string().required("Receipt number is required"),
@@ -36,6 +37,12 @@ const validationSchema = Yup.object().shape({
     )
     .required("At least one item is required"),
 });
+
+const calculateTotal = (items: any) => {
+  return items
+    .reduce((sum: any, item: any) => sum + parseFloat(item.amount), 0)
+    .toFixed(2);
+};
 
 export default function ReceiptTransactionFormTest() {
   const params = useLocalSearchParams();
@@ -107,7 +114,7 @@ export default function ReceiptTransactionFormTest() {
   if (!receiptData) {
     return (
       <SafeAreaView style={styles.container}>
-        <Text>Loading...</Text>
+        <TransactionFormLoading />
       </SafeAreaView>
     );
   }
@@ -121,7 +128,7 @@ export default function ReceiptTransactionFormTest() {
           delivered_by: receiptData?.delivered_by,
           delivered_to: receiptData?.delivered_to,
           address: receiptData?.address,
-          total: total,
+          total: receiptData?.total,
           date: initialDate,
           items: receiptData?.items || [],
         }}
@@ -165,10 +172,7 @@ export default function ReceiptTransactionFormTest() {
                 }}
                 data={selectData}
                 save="value"
-                defaultOption={{
-                  key: receipt_type,
-                  value: receipt_type,
-                }}
+                defaultOption={{ key: receipt_type, value: receipt_type }}
                 placeholder="Categories"
               />
 
@@ -211,19 +215,6 @@ export default function ReceiptTransactionFormTest() {
                 <Text style={styles.errorText}>{errors.address}</Text>
               )}
 
-              <TextInput
-                label="Total"
-                onChangeText={handleChange("total")}
-                onBlur={handleBlur("total")}
-                value={String(values.total)}
-                mode="outlined"
-                style={styles.input}
-                error={touched.total && !!errors.total}
-              />
-              {touched.total && errors.total && (
-                <Text style={styles.errorText}>{errors.total}</Text>
-              )}
-
               <DatePickerInput
                 locale="en"
                 label="Transaction Date"
@@ -252,18 +243,22 @@ export default function ReceiptTransactionFormTest() {
                       />
                       <TextInput
                         label="Unit Price"
-                        onChangeText={handleChange(
-                          `items[${index}].unit_price`
-                        )}
-                        onBlur={handleBlur(`items[${index}].unit_price`)}
                         value={String(item.unit_price)}
                         mode="outlined"
+                        disabled
                         style={styles.input}
                         keyboardType="numeric"
+                        editable={false}
                       />
                       <TextInput
                         label="Amount"
-                        onChangeText={handleChange(`items[${index}].amount`)}
+                        onChangeText={(value) => {
+                          handleChange(`items[${index}].amount`)(value);
+                          const newItems = [...values.items];
+                          newItems[index].amount = value;
+                          setFieldValue("items", newItems);
+                          setFieldValue("total", calculateTotal(newItems));
+                        }}
                         onBlur={handleBlur(`items[${index}].amount`)}
                         value={String(item.amount)}
                         mode="outlined"
@@ -272,26 +267,45 @@ export default function ReceiptTransactionFormTest() {
                       />
                     </View>
                   ))}
+
+                <TextInput
+                  label="Total"
+                  value={String(values.total)}
+                  mode="outlined"
+                  style={styles.input}
+                  error={touched.total && !!errors.total}
+                  editable={false}
+                />
+                {touched.total && errors.total && (
+                  <Text style={styles.errorText}>{errors.total}</Text>
+                )}
               </View>
 
+              {/* Submit Button */}
               <Button
-                onPress={() => handleSubmit()}
+                onPress={(e) => {
+                  e.preventDefault();
+                  handleSubmit();
+                }}
                 mode="contained"
                 style={styles.button}
                 labelStyle={styles.buttonLabel}
                 loading={isSubmitting}
+                // icon={"send"}
               >
                 Update Transaction
               </Button>
 
+              {/* Cancel Button */}
               <Button
                 onPress={() => {
                   router.replace("/(tabs)/transaction");
                 }}
                 mode="contained"
                 style={styles.button}
-                buttonColor={theme.colors.error}
+                buttonColor="red"
                 labelStyle={styles.buttonLabel}
+                // icon={"cancel"}
               >
                 Cancel Transaction
               </Button>
@@ -335,7 +349,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 16,
-    marginBottom: 8,
+    paddingVertical: 8,
   },
   buttonLabel: {
     fontSize: 16,
