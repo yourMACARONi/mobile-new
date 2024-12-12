@@ -9,6 +9,9 @@ import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 import { saveSessionFromQr, getUser } from "@/helper/session";
 import Overlay from "@/components/ui/qrOverlay";
+import { en, registerTranslation } from "react-native-paper-dates";
+
+registerTranslation("en", en);
 
 export default function LoginScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -22,7 +25,22 @@ export default function LoginScreen() {
     return <View />;
   }
 
-  //router.push("/(edit)/edit-transaction");
+  /**
+  router.push({
+    pathname: "/(edit)/edit-transaction",
+    params: {
+      type: "receipt",
+      id: 123,
+      receipt_number: "0056",
+      receipt_type: "Sales",
+      delivered_by: "CDO",
+      delivered_to: "Lapasan",
+      address: "Cagayan De Oro",
+      total: 1000,
+      date: "2024-04-04",
+    },
+  });
+   */
 
   const handleBarCodeScanned = async (result: BarcodeScanningResult) => {
     setIsLoading(false);
