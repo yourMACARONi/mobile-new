@@ -48,6 +48,7 @@ export default function NoReceiptTransactionForm() {
         ...body,
         category: selected,
         date: formattedDate,
+        amount: Number(body.amount),
       });
       router.dismiss();
     } else {
@@ -55,6 +56,7 @@ export default function NoReceiptTransactionForm() {
         ...body,
         category: selected,
         date: formattedDate,
+        amount: Number(body.amount),
       });
       router.dismiss();
     }

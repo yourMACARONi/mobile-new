@@ -1,3 +1,4 @@
+import React, { SetStateAction, useEffect, useState } from "react";
 import {
   SafeAreaView,
   KeyboardAvoidingView,
@@ -9,12 +10,32 @@ import {
 } from "react-native";
 import { theme } from "@/constants/theme";
 import { DatePickerInput } from "react-native-paper-dates";
-import { TextInput, Button, Text } from "react-native-paper";
-import { Formik } from "formik";
+import { TextInput, Button, Text, IconButton } from "react-native-paper";
+import { Formik, FieldArray } from "formik";
+import * as Yup from "yup";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SelectList } from "react-native-dropdown-select-list";
-import { SetStateAction, useState } from "react";
-import { patchReceiptContent } from "@/helper/receipt";
+import { patchReceiptContent, getReceiptContentById } from "@/helper/receipt";
+import { ReceiptData, ReceiptItem } from "@/constants/types";
+
+const validationSchema = Yup.object().shape({
+  receipt_number: Yup.string().required("Receipt number is required"),
+  date: Yup.date().required("Date is required"),
+  delivered_by: Yup.string().required("Delivered by is required"),
+  delivered_to: Yup.string().required("Delivered to is required"),
+  address: Yup.string().required("Address is required"),
+  receipt_type: Yup.string().required("Receipt type is required"),
+  total: Yup.string().required("Total is required"),
+  items: Yup.array()
+    .of(
+      Yup.object().shape({
+        description: Yup.string().required("Description is required"),
+        unit_price: Yup.string().required("Unit price is required"),
+        amount: Yup.string().required("Amount is required"),
+      })
+    )
+    .required("At least one item is required"),
+});
 
 export default function ReceiptTransactionFormTest() {
   const params = useLocalSearchParams();
@@ -36,14 +57,8 @@ export default function ReceiptTransactionFormTest() {
   //Select List
   const [selected, setSelected] = useState("");
   const selectData = [
-    {
-      key: "Sales",
-      value: "Sales",
-    },
-    {
-      key: "Expense",
-      value: "Expense",
-    },
+    { key: "Sales", value: "Sales" },
+    { key: "Expense", value: "Expense" },
   ];
 
   //handle Submit Form
@@ -57,13 +72,12 @@ export default function ReceiptTransactionFormTest() {
       ...body,
       id: Number(body.id),
       date: formattedDate,
+      receipt_type: selected,
+      items: body.items,
+      total: Number(body.total),
     };
 
-    const req = await patchReceiptContent({
-      ...body,
-      date: formattedDate,
-      receipt_type: selected,
-    });
+    const req = await patchReceiptContent(data);
 
     if (req?.ok) {
       Alert.alert("Success", "Receipt has been updated");
@@ -74,18 +88,44 @@ export default function ReceiptTransactionFormTest() {
     }
   };
 
+  // getData from the server using ID
+  const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
+
+  useEffect(() => {
+    const fetchReceipt = async () => {
+      try {
+        const content = await getReceiptContentById(id as string);
+        setReceiptData(content);
+      } catch (error) {
+        console.log(error);
+        Alert.alert("Error", "Failed to fetch receipt data");
+      }
+    };
+    fetchReceipt();
+  }, [id]);
+
+  if (!receiptData) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text>Loading...</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <Formik
         initialValues={{
           id: id,
-          receipt_number: receipt_number,
-          delivered_by: delivered_by,
-          delivered_to: delivered_to,
-          address: address,
+          receipt_number: receiptData?.receipt_number,
+          delivered_by: receiptData?.delivered_by,
+          delivered_to: receiptData?.delivered_to,
+          address: receiptData?.address,
           total: total,
           date: initialDate,
+          items: receiptData?.items || [],
         }}
+        validationSchema={validationSchema}
         onSubmit={handleSubmitForm}
       >
         {({
@@ -102,15 +142,14 @@ export default function ReceiptTransactionFormTest() {
             style={styles.formContainer}
             behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
-            {/* Input */}
-            <View>
+            <ScrollView>
               <Text style={styles.title}>Edit Receipt Transaction Form</Text>
 
               <TextInput
                 label="Receipt Number"
-                onChangeText={handleChange("id")}
-                onBlur={handleBlur("id")}
-                value={values.receipt_number as string}
+                onChangeText={handleChange("receipt_number")}
+                onBlur={handleBlur("receipt_number")}
+                value={values.receipt_number}
                 mode="outlined"
                 style={styles.input}
                 error={touched.receipt_number && !!errors.receipt_number}
@@ -120,9 +159,12 @@ export default function ReceiptTransactionFormTest() {
               )}
 
               <SelectList
-                setSelected={(val: SetStateAction<string>) => setSelected(val)}
+                setSelected={(val: SetStateAction<string>) => {
+                  setSelected(val);
+                  setFieldValue("receipt_type", val);
+                }}
                 data={selectData}
-                save="key"
+                save="value"
                 defaultOption={{
                   key: receipt_type,
                   value: receipt_type,
@@ -134,7 +176,7 @@ export default function ReceiptTransactionFormTest() {
                 label="Delivered By"
                 onChangeText={handleChange("delivered_by")}
                 onBlur={handleBlur("delivered_by")}
-                value={values.delivered_by as string}
+                value={values.delivered_by}
                 mode="outlined"
                 style={styles.input}
                 error={touched.delivered_by && !!errors.delivered_by}
@@ -147,7 +189,7 @@ export default function ReceiptTransactionFormTest() {
                 label="Delivered To"
                 onChangeText={handleChange("delivered_to")}
                 onBlur={handleBlur("delivered_to")}
-                value={values.delivered_to as string}
+                value={values.delivered_to}
                 mode="outlined"
                 style={styles.input}
                 error={touched.delivered_to && !!errors.delivered_to}
@@ -160,7 +202,7 @@ export default function ReceiptTransactionFormTest() {
                 label="Address"
                 onChangeText={handleChange("address")}
                 onBlur={handleBlur("address")}
-                value={values.address as string}
+                value={values.address}
                 mode="outlined"
                 style={styles.input}
                 error={touched.address && !!errors.address}
@@ -182,52 +224,78 @@ export default function ReceiptTransactionFormTest() {
                 <Text style={styles.errorText}>{errors.total}</Text>
               )}
 
-              <View style={{ marginTop: 30 }}>
-                <DatePickerInput
-                  presentationStyle="pageSheet"
-                  locale="en"
-                  label="Transaction Date"
-                  value={values.date}
-                  style={{
-                    backgroundColor: "white",
-                    borderColor: "black",
-                    borderRadius: 2,
-                    borderStyle: "solid",
-                  }}
-                  onChange={(newDate) => setFieldValue("date", newDate)}
-                  inputMode="start"
-                />
-              </View>
-            </View>
+              <DatePickerInput
+                locale="en"
+                label="Transaction Date"
+                value={values.date}
+                onChange={(d) => setFieldValue("date", d)}
+                inputMode="start"
+                mode="outlined"
+                style={styles.input}
+              />
 
-            {/* Button */}
-            <View style={{ marginBottom: 20 }}>
-              {/* Submit Button */}
+              {/* Items */}
+              <View style={{ marginTop: 20 }}>
+                <Text style={styles.subtitle}>Items</Text>
+                {values.items &&
+                  values.items.map((item, index) => (
+                    <View key={index} style={styles.itemContainer}>
+                      <TextInput
+                        label="Description"
+                        onChangeText={handleChange(
+                          `items[${index}].description`
+                        )}
+                        onBlur={handleBlur(`items[${index}].description`)}
+                        value={item.description}
+                        mode="outlined"
+                        style={styles.input}
+                      />
+                      <TextInput
+                        label="Unit Price"
+                        onChangeText={handleChange(
+                          `items[${index}].unit_price`
+                        )}
+                        onBlur={handleBlur(`items[${index}].unit_price`)}
+                        value={String(item.unit_price)}
+                        mode="outlined"
+                        style={styles.input}
+                        keyboardType="numeric"
+                      />
+                      <TextInput
+                        label="Amount"
+                        onChangeText={handleChange(`items[${index}].amount`)}
+                        onBlur={handleBlur(`items[${index}].amount`)}
+                        value={String(item.amount)}
+                        mode="outlined"
+                        style={styles.input}
+                        keyboardType="numeric"
+                      />
+                    </View>
+                  ))}
+              </View>
+
               <Button
                 onPress={() => handleSubmit()}
                 mode="contained"
                 style={styles.button}
                 labelStyle={styles.buttonLabel}
                 loading={isSubmitting}
-                // icon={"send"}
               >
                 Update Transaction
               </Button>
 
-              {/* Cancel Button */}
               <Button
                 onPress={() => {
                   router.replace("/(tabs)/transaction");
                 }}
                 mode="contained"
                 style={styles.button}
-                buttonColor="red"
+                buttonColor={theme.colors.error}
                 labelStyle={styles.buttonLabel}
-                // icon={"cancel"}
               >
                 Cancel Transaction
               </Button>
-            </View>
+            </ScrollView>
           </KeyboardAvoidingView>
         )}
       </Formik>
@@ -242,21 +310,19 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     flex: 1,
-    justifyContent: "space-between",
     padding: 16,
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.roundness,
-    margin: 16,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 16,
+    color: theme.colors.primary,
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
     color: theme.colors.primary,
   },
   input: {
@@ -266,14 +332,26 @@ const styles = StyleSheet.create({
     color: theme.colors.error,
     fontSize: 12,
     marginBottom: 8,
-    marginLeft: 8,
   },
   button: {
     marginTop: 16,
-    paddingVertical: 8,
+    marginBottom: 8,
   },
   buttonLabel: {
     fontSize: 16,
     fontWeight: "bold",
+  },
+  itemContainer: {
+    marginBottom: 16,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.outline,
+    borderRadius: 4,
+  },
+  addItemButton: {
+    marginBottom: 16,
+  },
+  deleteButton: {
+    alignSelf: "flex-end",
   },
 });
