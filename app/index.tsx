@@ -5,11 +5,12 @@ import {
   BarcodeScanningResult,
 } from "expo-camera";
 import { useState, useRef } from "react";
-import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
 import { saveSessionFromQr, getUser } from "@/helper/session";
 import Overlay from "@/components/ui/qrOverlay";
 import { en, registerTranslation } from "react-native-paper-dates";
+import { Button } from "react-native-paper";
 
 registerTranslation("en", en);
 

@@ -215,9 +215,10 @@ export default function ReceiptTransactionForm() {
             <View style={{ marginBottom: 20 }}>
               {/* Submit Button */}
               <Button
-                onPress={(e) => {
-                  e.preventDefault();
+                onPress={() => {
+                  // e.preventDefault();
                   handleSubmit();
+                  console.log("PewPew");
                 }}
                 mode="contained"
                 style={styles.button}
